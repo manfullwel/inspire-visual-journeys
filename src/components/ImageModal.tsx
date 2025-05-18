@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { GalleryItem } from '@/data/gallery';
 import { Button } from '@/components/ui/button';
+import { Calendar, MapPin } from 'lucide-react';
 
 interface ImageModalProps {
   item?: GalleryItem;
@@ -34,6 +35,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ item, isOpen, onClose }) => {
             src={item.image} 
             alt={item.title}
             className="w-full h-auto object-cover"
+            loading="lazy" // Added lazy loading
           />
         </div>
 
@@ -44,6 +46,19 @@ const ImageModal: React.FC<ImageModalProps> = ({ item, isOpen, onClose }) => {
             <h4 className="font-bold text-event-dark mb-2">Motivação:</h4>
             <p className="text-gray-700 italic">&ldquo;{item.motivation}&rdquo;</p>
           </div>
+
+          {item.title === "Bike Night Amazonas" && (
+            <div className="mt-4 flex flex-col sm:flex-row gap-4">
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-5 w-5 text-event-blue" />
+                <span>Sexta-feira, 20h</span>
+              </div>
+              <div className="flex items-center">
+                <MapPin className="mr-2 h-5 w-5 text-event-orange" />
+                <span>Praça da Saudade</span>
+              </div>
+            </div>
+          )}
         </DialogDescription>
 
         <DialogFooter>

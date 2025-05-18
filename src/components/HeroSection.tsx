@@ -13,12 +13,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0">
         <div 
-          className="absolute inset-0 bg-black opacity-50 z-10"
+          className="absolute inset-0 bg-black opacity-60 z-10"
           aria-hidden="true"
         ></div>
         <img
-          src="https://images.unsplash.com/photo-1468818438311-4bab781ab9b8"
-          alt="Ciclistas em uma paisagem montanhosa"
+          src="/lovable-uploads/964ed381-d76b-4e70-9b4d-5d693e16b745.png"
+          alt="BIKE NIGHT AMAZONAS, com silhuetas de ciclistas pedalando contra o pôr do sol"
           className="w-full h-full object-cover"
         />
       </div>
@@ -27,10 +27,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
         <div className="animate-fade-in">
           <Bike className="mx-auto h-20 w-20 mb-6 text-event-orange" />
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg">
-            Celebre Cada Passo: Sua Jornada de Inspiração Começa Aqui
+            BIKE NIGHT AMAZONAS
           </h1>
           <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-100">
-            Explore momentos que transformam, motivam e relembram o poder que reside em cada um de nós.
+            Uma experiência única para pedalar, sorrir e celebrar juntos a liberdade sobre duas rodas!
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -38,14 +38,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
               onClick={onDiscoverClick}
               className="bg-event-orange hover:bg-orange-600 text-white px-8 py-6 text-lg transition-transform hover:scale-105"
             >
-              Descubra Histórias
+              Ver Galeria
             </Button>
             <Button 
               onClick={onPurposeClick}
               variant="outline" 
               className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg transition-transform hover:scale-105"
             >
-              Conheça o Propósito
+              Saiba Mais
             </Button>
           </div>
         </div>
