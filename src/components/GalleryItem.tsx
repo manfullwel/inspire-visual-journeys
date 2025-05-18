@@ -18,7 +18,7 @@ const GalleryItem: React.FC<GalleryItemProps> = ({ item, onClick }) => {
         src={item.image}
         alt={item.title}
         className="w-full h-64 object-cover transition-all group-hover:brightness-90"
-        loading="lazy" // Added lazy loading
+        loading="lazy" // Keep lazy loading
       />
       
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">

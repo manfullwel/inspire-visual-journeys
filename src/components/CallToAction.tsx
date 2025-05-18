@@ -12,7 +12,7 @@ const CallToAction: React.FC<CallToActionProps> = ({ onDiscoverClick }) => {
     <section className="py-20 bg-gradient-to-r from-event-blue/80 to-event-green/80 text-white">
       <div className="container px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          Por que participar do BIKE NIGHT AMAZONAS?
+          Por Que Pedalar Conosco?
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-10">
@@ -42,24 +42,28 @@ const CallToAction: React.FC<CallToActionProps> = ({ onDiscoverClick }) => {
           
           <div className="bg-white/10 p-6 rounded-lg backdrop-blur-sm">
             <h3 className="font-bold text-xl mb-2 flex items-center justify-center">
-              <Heart className="mr-2 h-5 w-5" /> Benefícios
+              <Heart className="mr-2 h-5 w-5" /> Tudo Pronto Para o Pedal?
             </h3>
             <ul className="text-left space-y-2">
               <li className="flex items-start">
-                <span className="mr-2 font-bold">•</span>
-                <span>Visual Único: A cidade sob iluminação urbana</span>
+                <span className="mr-2 font-bold">✅</span>
+                <span>Bike revisada e pneus calibrados</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2 font-bold">•</span>
-                <span>Comunidade: Faça novas amizades entre ciclistas</span>
+                <span className="mr-2 font-bold">💡</span>
+                <span>Farol e luzes de segurança carregados</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2 font-bold">•</span>
-                <span>Saúde & Bem-estar: Movimento ao ar livre</span>
+                <span className="mr-2 font-bold">💧</span>
+                <span>Hidratação é fundamental: traga sua água</span>
               </li>
               <li className="flex items-start">
-                <span className="mr-2 font-bold">•</span>
-                <span>Inspiração: Cenários encantadores para fotos e vídeos</span>
+                <span className="mr-2 font-bold">🪖</span>
+                <span>Capacete sempre!</span>
+              </li>
+              <li className="flex items-start">
+                <span className="mr-2 font-bold">😊</span>
+                <span>Seu melhor sorriso e muita energia positiva!</span>
               </li>
             </ul>
           </div>

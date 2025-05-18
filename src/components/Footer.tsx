@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Bike } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -39,7 +40,9 @@ const Footer: React.FC = () => {
         <div className="mt-12 border-t border-gray-700 pt-6 text-center md:text-right">
           <p className="text-gray-400 text-sm">© 2025 Pedal & Superação. Todos os direitos reservados.</p>
           <p className="text-gray-500 text-xs mt-2">
-            <a href="#" className="hover:text-gray-300 transition-colors">Admin Login</a>
+            <Link to="/admin-login" className="hover:text-gray-300 transition-colors">
+              Admin Login
+            </Link>
           </p>
         </div>
       </div>

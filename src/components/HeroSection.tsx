@@ -20,6 +20,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
           src="/lovable-uploads/964ed381-d76b-4e70-9b4d-5d693e16b745.png"
           alt="BIKE NIGHT AMAZONAS, com silhuetas de ciclistas pedalando contra o pôr do sol"
           className="w-full h-full object-cover"
+          loading="lazy"
         />
       </div>
       
@@ -29,8 +30,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
           <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg">
             BIKE NIGHT AMAZONAS
           </h1>
-          <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-100">
-            Uma experiência única para pedalar, sorrir e celebrar juntos a liberdade sobre duas rodas!
+          <p className="text-xl md:text-2xl mb-6 max-w-3xl mx-auto text-gray-100">
+            Pedale, Sorria, Celebre a Liberdade Sobre Duas Rodas em Manaus!
+          </p>
+          
+          <p className="text-lg mb-10 max-w-2xl mx-auto text-gray-200">
+            Junte-se a nós para uma experiência única de ciclismo noturno pelas ruas de Manaus. 
+            Energia, comunidade e a beleza da cidade sob um novo olhar esperam por você.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -38,14 +44,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
               onClick={onDiscoverClick}
               className="bg-event-orange hover:bg-orange-600 text-white px-8 py-6 text-lg transition-transform hover:scale-105"
             >
-              Ver Galeria
+              Ver Nossos Momentos
             </Button>
             <Button 
               onClick={onPurposeClick}
               variant="outline" 
               className="border-white text-white hover:bg-white/10 px-8 py-6 text-lg transition-transform hover:scale-105"
             >
-              Saiba Mais
+              Próximo Pedal: Saiba Mais!
             </Button>
           </div>
         </div>

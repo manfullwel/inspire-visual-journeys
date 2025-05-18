@@ -1,15 +1,17 @@
 
-// This file provides the type definition and local data for gallery items
-// When fetching from Supabase, we'll convert the response to match this interface
+// This file provides the type definition for gallery items
+// We now fetch data from Supabase
 
 export interface GalleryItem {
-  id: number;
+  id: number | string;  // Support both number from old data and UUID from Supabase
   image: string;
   title: string;
   description: string;
   motivation: string;
+  created_at?: string;
 }
 
+// This is now just for fallback purposes if Supabase fails
 export const galleryItems: GalleryItem[] = [
   {
     id: 1,
