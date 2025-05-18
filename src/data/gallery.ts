@@ -1,4 +1,7 @@
 
+// This file provides the type definition and local data for gallery items
+// When fetching from Supabase, we'll convert the response to match this interface
+
 export interface GalleryItem {
   id: number;
   image: string;
