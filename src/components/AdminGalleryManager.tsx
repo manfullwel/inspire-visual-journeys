@@ -133,7 +133,7 @@ const AdminGalleryManager: React.FC = () => {
           description: data.description,
           motivation: data.motivation,
         })
-        .eq('id', selectedItem.id);
+        .eq('id', String(selectedItem.id)); // Convert id to string
       
       if (error) throw error;
       
@@ -160,7 +160,7 @@ const AdminGalleryManager: React.FC = () => {
       const { error } = await supabase
         .from('gallery_items')
         .delete()
-        .eq('id', selectedItem.id);
+        .eq('id', String(selectedItem.id)); // Convert id to string
       
       if (error) throw error;
       
