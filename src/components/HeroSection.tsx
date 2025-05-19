@@ -17,8 +17,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscoverClick, onPurposeCli
           aria-hidden="true"
         ></div>
         <img
-          src="/lovable-uploads/964ed381-d76b-4e70-9b4d-5d693e16b745.png"
-          alt="BIKE NIGHT AMAZONAS, com silhuetas de ciclistas pedalando contra o pôr do sol"
+          src="/lovable-uploads/866ebab1-6af1-45a7-8700-70b512305b2e.png"
+          alt="BIKE NIGHT AMAZONAS, com ciclistas coloridos pedalando em um fundo urbano noturno"
           className="w-full h-full object-cover"
           loading="lazy"
         />

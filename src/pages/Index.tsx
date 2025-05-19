@@ -6,12 +6,15 @@ import Gallery from '@/components/Gallery';
 import CallToAction from '@/components/CallToAction';
 import Footer from '@/components/Footer';
 import ImageModal from '@/components/ImageModal';
+import HistorySection from '@/components/HistorySection';
+import ParticipationForm from '@/components/ParticipationForm';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { useToast } from '@/components/ui/use-toast';
 
 const Index: React.FC = () => {
   const purposeRef = useRef<HTMLElement>(null);
   const galleryRef = useRef<HTMLElement>(null);
+  const participationRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
   const [selectedItem, setSelectedItem] = useState<GalleryItemType | undefined>(undefined);
@@ -27,11 +30,7 @@ const Index: React.FC = () => {
   };
 
   const handleParticipateClick = () => {
-    toast({
-      title: "Em breve!",
-      description: "As inscrições para o próximo evento estarão disponíveis em breve.",
-      duration: 5000,
-    });
+    participationRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -43,10 +42,16 @@ const Index: React.FC = () => {
       
       <PurposeSection ref={purposeRef} />
       
+      <HistorySection />
+      
       <Gallery 
         ref={galleryRef} 
         onItemClick={handleItemClick} 
       />
+      
+      <div ref={participationRef}>
+        <ParticipationForm />
+      </div>
       
       <CallToAction onDiscoverClick={handleParticipateClick} />
       
