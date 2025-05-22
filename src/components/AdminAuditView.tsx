@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, Search } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AccessDenied from './AccessDenied';
+import { Json } from '@/integrations/supabase/types';
 
 interface AuditLog {
   id: string;
@@ -105,9 +106,15 @@ const AdminAuditView: React.FC = () => {
             continue;
           }
           
+          // Fix: Properly handle the JSON data from the RPC function
           if (userData) {
-            const typedUserData = userData as UserData;
-            userEmails[userId] = typedUserData.email || userId;
+            // Cast to any first to access the JSON properties safely
+            const jsonData = userData as any;
+            if (jsonData.email) {
+              userEmails[userId] = jsonData.email;
+            } else {
+              userEmails[userId] = userId; // Fallback to user ID if email not available
+            }
           }
         }
         
