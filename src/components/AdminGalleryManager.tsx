@@ -22,7 +22,8 @@ import {
 } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
-import { Edit, Trash, Image, Plus, Camera } from 'lucide-react';
+import { Edit, Trash, Image, Plus, Camera, RefreshCw, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface GalleryItemFormData {
   title: string;
@@ -34,6 +35,8 @@ interface GalleryItemFormData {
 const AdminGalleryManager: React.FC = () => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -72,6 +75,8 @@ const AdminGalleryManager: React.FC = () => {
 
   const fetchGalleryItems = async () => {
     setLoading(true);
+    setError(null);
+    
     try {
       const { data, error } = await supabase
         .from('gallery_items')
@@ -82,6 +87,8 @@ const AdminGalleryManager: React.FC = () => {
       
       setItems(data || []);
     } catch (error: any) {
+      console.error('Error fetching gallery items:', error);
+      setError(error.message || 'Erro ao carregar imagens da galeria');
       toast({
         title: 'Erro ao carregar imagens',
         description: error.message,
@@ -89,6 +96,21 @@ const AdminGalleryManager: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshGallery = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchGalleryItems();
+      toast({
+        title: 'Galeria atualizada',
+        description: 'As imagens foram atualizadas com sucesso.',
+      });
+    } catch (error) {
+      // Erros já são tratados em fetchGalleryItems
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -113,6 +135,7 @@ const AdminGalleryManager: React.FC = () => {
       setIsAddModalOpen(false);
       fetchGalleryItems();
     } catch (error: any) {
+      console.error('Error adding gallery item:', error);
       toast({
         title: 'Erro ao adicionar imagem',
         description: error.message,
@@ -145,6 +168,7 @@ const AdminGalleryManager: React.FC = () => {
       setIsEditModalOpen(false);
       fetchGalleryItems();
     } catch (error: any) {
+      console.error('Error updating gallery item:', error);
       toast({
         title: 'Erro ao atualizar imagem',
         description: error.message,
@@ -172,6 +196,7 @@ const AdminGalleryManager: React.FC = () => {
       setIsDeleteModalOpen(false);
       fetchGalleryItems();
     } catch (error: any) {
+      console.error('Error deleting gallery item:', error);
       toast({
         title: 'Erro ao excluir imagem',
         description: error.message,
@@ -184,17 +209,55 @@ const AdminGalleryManager: React.FC = () => {
     <div className="bg-white rounded-lg shadow p-6 my-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-event-dark">Gerenciar Galeria</h2>
-        <Button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-event-green hover:bg-green-600"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Adicionar Nova Imagem
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={refreshGallery}
+            variant="outline"
+            disabled={isRefreshing}
+            className="flex items-center gap-1"
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Atualizar
+          </Button>
+          <Button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-event-green hover:bg-green-600"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Nova Imagem
+          </Button>
+        </div>
       </div>
       
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertTitle>Erro ao carregar imagens</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       {loading ? (
-        <div className="text-center py-12">Carregando...</div>
+        <div className="flex flex-col justify-center items-center py-12">
+          <Loader2 className="w-10 h-10 text-event-orange animate-spin mb-4" />
+          <div className="text-center">Carregando imagens da galeria...</div>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <Image className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-1">Nenhuma imagem encontrada</h3>
+          <p className="text-gray-500 mb-4">Adicione imagens à galeria para que elas apareçam aqui.</p>
+          <Button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-event-green hover:bg-green-600"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Primeira Imagem
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
@@ -204,6 +267,9 @@ const AdminGalleryManager: React.FC = () => {
                   src={item.image} 
                   alt={item.title} 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.svg';
+                  }}
                 />
               </div>
               
@@ -281,7 +347,6 @@ const AdminGalleryManager: React.FC = () => {
                           variant="outline"
                           className="ml-2"
                           onClick={() => {
-                            // In a real app, this would open a file upload dialog
                             toast({
                               title: "Upload de imagem",
                               description: "Em um ambiente de produção, isso abriria um seletor de arquivos.",
@@ -379,7 +444,6 @@ const AdminGalleryManager: React.FC = () => {
                           variant="outline"
                           className="ml-2"
                           onClick={() => {
-                            // In a real app, this would open a file upload dialog
                             toast({
                               title: "Upload de imagem",
                               description: "Em um ambiente de produção, isso abriria um seletor de arquivos.",

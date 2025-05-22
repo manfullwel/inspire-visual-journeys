@@ -4,6 +4,7 @@ import GalleryItem from './GalleryItem';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 interface GalleryProps {
   id?: string;
@@ -13,10 +14,14 @@ interface GalleryProps {
 const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref) => {
   const [items, setItems] = useState<GalleryItemType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGalleryItems = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const { data, error } = await supabase
           .from('gallery_items')
           .select('*')
@@ -27,6 +32,7 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
         setItems(data || []);
       } catch (error: any) {
         console.error('Error fetching gallery items:', error);
+        setError('Não foi possível carregar as imagens da galeria.');
         toast({
           title: 'Erro ao carregar galeria',
           description: 'Não foi possível carregar as imagens da galeria.',
@@ -39,6 +45,42 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
 
     fetchGalleryItems();
   }, []);
+
+  // Função para tentar carregar as imagens novamente
+  const handleRetry = () => {
+    const fetchGalleryItems = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error } = await supabase
+          .from('gallery_items')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        setItems(data || []);
+        
+        toast({
+          title: 'Galeria atualizada',
+          description: 'As imagens foram carregadas com sucesso.',
+        });
+      } catch (error: any) {
+        console.error('Error fetching gallery items:', error);
+        setError('Não foi possível carregar as imagens da galeria.');
+        toast({
+          title: 'Erro ao carregar galeria',
+          description: 'Não foi possível carregar as imagens da galeria.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryItems();
+  };
 
   return (
     <section ref={ref} id={id} className="py-20 bg-white">
@@ -53,8 +95,25 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
         </p>
         
         {loading ? (
-          <div className="flex justify-center items-center h-64">
+          <div className="flex flex-col justify-center items-center h-64">
+            <Loader2 className="w-10 h-10 text-event-orange animate-spin mb-4" />
             <p className="text-xl text-gray-500">Carregando galeria...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col justify-center items-center h-64">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto text-center">
+              <p className="text-red-600 mb-4">{error}</p>
+              <button 
+                onClick={handleRetry}
+                className="px-4 py-2 bg-event-orange text-white rounded-md hover:bg-orange-600 transition-colors"
+              >
+                Tentar Novamente
+              </button>
+            </div>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-xl text-gray-500">Nenhuma imagem encontrada na galeria.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
