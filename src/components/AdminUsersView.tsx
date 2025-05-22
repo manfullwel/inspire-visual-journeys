@@ -26,7 +26,6 @@ import { AlertCircle, UserPlus, User, Users, Shield } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import AccessDenied from './AccessDenied';
 
 interface UserProfile {
@@ -51,50 +50,28 @@ const AdminUsersView: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Fetch all users from auth schema (this requires admin privileges)
-        const { data: usersData, error: usersError } = await supabase
-          .from('auth.users')
-          .select('id, email, last_sign_in_at')
-          .order('created_at', { ascending: false });
-        
-        if (usersError) {
-          console.log('Trying alternative approach to fetch users');
-          // Fallback to using a function if direct query doesn't work
-          const { data: alternativeData, error: alternativeError } = await supabase
-            .rpc('list_users')
-            .order('created_at', { ascending: false });
-          
-          if (alternativeError) throw alternativeError;
-          if (!alternativeData) throw new Error('Falha ao carregar usuários');
-          
-          // Get admin profiles separately
-          const { data: adminData } = await supabase
-            .from('admin_profiles')
-            .select('id, role');
-          
-          // Merge the data
-          const mergedData = alternativeData.map((user: any) => {
-            const adminProfile = adminData?.find(admin => admin.id === user.id);
-            return {
-              ...user,
-              is_admin: !!adminProfile,
-              role: adminProfile?.role || null
-            };
-          });
-          
-          setUsers(mergedData);
-          return;
-        }
-        
-        if (!usersData) throw new Error('Falha ao carregar usuários');
-        
-        // Get admin profiles separately
-        const { data: adminData } = await supabase
+        // Get admin profiles first
+        const { data: adminData, error: adminError } = await supabase
           .from('admin_profiles')
           .select('id, role');
         
+        if (adminError) throw adminError;
+        
+        // Get users using a server function instead of direct query to auth.users
+        const { data: usersData, error: usersError } = await supabase
+          .rpc('get_all_users');
+        
+        if (usersError) {
+          console.error('Error fetching users:', usersError);
+          throw new Error('Falha ao carregar usuários. Por favor, verifique se a função RPC "get_all_users" está criada.');
+        }
+        
+        if (!usersData || !Array.isArray(usersData)) {
+          throw new Error('Dados de usuários não disponíveis');
+        }
+        
         // Merge the data
-        const mergedData = usersData.map(user => {
+        const mergedData = usersData.map((user: any) => {
           const adminProfile = adminData?.find(admin => admin.id === user.id);
           return {
             ...user,
@@ -105,6 +82,7 @@ const AdminUsersView: React.FC = () => {
         
         setUsers(mergedData);
       } catch (error: any) {
+        console.error('Error in fetchUsers:', error);
         setError(error.message || 'Erro ao carregar usuários');
       } finally {
         setLoading(false);
@@ -128,14 +106,11 @@ const AdminUsersView: React.FC = () => {
         return;
       }
       
-      // Check if user exists
+      // Use RPC function to get user by email
       const { data: userData, error: userError } = await supabase
-        .from('auth.users')
-        .select('id')
-        .eq('email', emailInput)
-        .single();
+        .rpc('get_user_by_email', { user_email: emailInput });
       
-      if (userError) {
+      if (userError || !userData) {
         toast({
           title: 'Usuário não encontrado',
           description: 'Não foi possível encontrar um usuário com este email',

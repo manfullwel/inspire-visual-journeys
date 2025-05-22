@@ -46,6 +46,10 @@ interface AuditLog {
   user_email?: string;
 }
 
+interface UserData {
+  email: string;
+}
+
 const AdminAuditView: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ const AdminAuditView: React.FC = () => {
       try {
         let query = supabase
           .from('audit_logs')
-          .select('*, user_email:auth.users(email)', { count: 'exact' })
+          .select('*', { count: 'exact' })
           .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
           .order('created_at', { ascending: false });
         
@@ -86,14 +90,25 @@ const AdminAuditView: React.FC = () => {
           throw error;
         }
         
-        // Format the data to extract user email from the join
-        const formattedData = data?.map(log => {
-          const { user_email, ...rest } = log;
-          return {
-            ...rest,
-            user_email: typeof user_email === 'object' ? user_email.email : null
-          };
-        }) || [];
+        // Get user emails for each audit log
+        const userIds = Array.from(new Set(data?.map(log => log.user_id) || []));
+        const userEmails: Record<string, string> = {};
+        
+        // Get user emails using RPC function instead of direct query
+        for (const userId of userIds) {
+          const { data: userData } = await supabase
+            .rpc('get_user_by_id', { user_id: userId });
+          
+          if (userData && userData.email) {
+            userEmails[userId] = userData.email;
+          }
+        }
+        
+        // Merge the user emails into the audit logs
+        const formattedData = data?.map(log => ({
+          ...log,
+          user_email: userEmails[log.user_id] || log.user_id
+        })) || [];
         
         setLogs(formattedData);
         
@@ -229,7 +244,7 @@ const AdminAuditView: React.FC = () => {
                         {formatDistanceToNow(new Date(log.created_at), { addSuffix: true, locale: ptBR })}
                       </div>
                     </TableCell>
-                    <TableCell>{log.user_email || log.user_id}</TableCell>
+                    <TableCell>{log.user_email}</TableCell>
                     <TableCell>
                       <Badge className={getBadgeColor(log.action)}>
                         {log.action === 'insert' && 'Inserção'}
