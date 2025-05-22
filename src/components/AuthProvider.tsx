@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   isAdmin: false,
+  isSuperAdmin: false,
   loading: true,
   signOut: async () => {},
 });
@@ -25,6 +27,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsSuperAdmin(false);
         }
       }
     );
@@ -74,14 +78,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const { data, error } = await supabase
         .from('admin_profiles')
-        .select('*')
+        .select('role')
         .eq('id', userId)
         .single();
       
-      setIsAdmin(!!data && !error);
+      if (error) {
+        setIsAdmin(false);
+        setIsSuperAdmin(false);
+        return;
+      }
+      
+      setIsAdmin(!!data);
+      setIsSuperAdmin(data?.role === 'super_admin');
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);
+      setIsSuperAdmin(false);
     }
   };
 
@@ -90,12 +102,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSession(null);
     setUser(null);
     setIsAdmin(false);
+    setIsSuperAdmin(false);
   };
 
   const value = {
     session,
     user,
     isAdmin,
+    isSuperAdmin,
     loading,
     signOut
   };

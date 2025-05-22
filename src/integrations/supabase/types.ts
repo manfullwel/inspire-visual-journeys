@@ -27,6 +27,77 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity: string
+          entity_id: string | null
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity: string
+          entity_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      comments: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          gallery_item_id: string
+          id: string
+          is_approved: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string
+          gallery_item_id: string
+          id?: string
+          is_approved?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          gallery_item_id?: string
+          id?: string
+          is_approved?: boolean | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_gallery_item_id_fkey"
+            columns: ["gallery_item_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_items: {
         Row: {
           created_at: string
@@ -54,15 +125,45 @@ export type Database = {
         }
         Relationships: []
       }
+      system_stats: {
+        Row: {
+          content_created: number | null
+          id: string
+          last_updated: string
+          signups: number | null
+          stat_date: string
+          visits: number | null
+        }
+        Insert: {
+          content_created?: number | null
+          id?: string
+          last_updated?: string
+          signups?: number | null
+          stat_date?: string
+          visits?: number | null
+        }
+        Update: {
+          content_created?: number | null
+          id?: string
+          last_updated?: string
+          signups?: number | null
+          stat_date?: string
+          visits?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_super_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      admin_role: "super_admin" | "content_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -177,6 +278,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      admin_role: ["super_admin", "content_admin"],
+    },
   },
 } as const
