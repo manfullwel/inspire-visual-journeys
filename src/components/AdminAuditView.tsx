@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthProvider';
@@ -47,7 +46,9 @@ interface AuditLog {
 }
 
 interface UserData {
+  id: string;
   email: string;
+  last_sign_in_at?: string;
 }
 
 const AdminAuditView: React.FC = () => {
@@ -94,13 +95,19 @@ const AdminAuditView: React.FC = () => {
         const userIds = Array.from(new Set(data?.map(log => log.user_id) || []));
         const userEmails: Record<string, string> = {};
         
-        // Get user emails using RPC function instead of direct query
+        // Get user emails using RPC function
         for (const userId of userIds) {
-          const { data: userData } = await supabase
+          const { data: userData, error: userError } = await supabase
             .rpc('get_user_by_id', { user_id: userId });
           
-          if (userData && userData.email) {
-            userEmails[userId] = userData.email;
+          if (userError) {
+            console.error('Error fetching user:', userError);
+            continue;
+          }
+          
+          if (userData) {
+            const typedUserData = userData as UserData;
+            userEmails[userId] = typedUserData.email || userId;
           }
         }
         

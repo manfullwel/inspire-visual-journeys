@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthProvider';
@@ -31,7 +30,7 @@ import AccessDenied from './AccessDenied';
 interface UserProfile {
   id: string;
   email: string;
-  last_sign_in_at: string;
+  last_sign_in_at?: string;
   is_admin: boolean;
   role: string | null;
 }
@@ -57,7 +56,7 @@ const AdminUsersView: React.FC = () => {
         
         if (adminError) throw adminError;
         
-        // Get users using a server function instead of direct query to auth.users
+        // Get users using a server function
         const { data: usersData, error: usersError } = await supabase
           .rpc('get_all_users');
         
@@ -66,12 +65,12 @@ const AdminUsersView: React.FC = () => {
           throw new Error('Falha ao carregar usuários. Por favor, verifique se a função RPC "get_all_users" está criada.');
         }
         
-        if (!usersData || !Array.isArray(usersData)) {
+        if (!usersData) {
           throw new Error('Dados de usuários não disponíveis');
         }
         
         // Merge the data
-        const mergedData = usersData.map((user: any) => {
+        const mergedData = (usersData as any[]).map((user: any) => {
           const adminProfile = adminData?.find(admin => admin.id === user.id);
           return {
             ...user,
@@ -119,11 +118,13 @@ const AdminUsersView: React.FC = () => {
         return;
       }
       
+      const typedUserData = userData as { id: string; email: string };
+      
       // Add admin profile
       const { error: adminError } = await supabase
         .from('admin_profiles')
         .insert({
-          id: userData.id,
+          id: typedUserData.id,
           role: adminRole
         });
       

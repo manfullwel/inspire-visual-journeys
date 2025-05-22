@@ -157,6 +157,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_users: {
+        Args: Record<PropertyKey, never>
+        Returns: Json[]
+      }
+      get_user_by_email: {
+        Args: { user_email: string }
+        Returns: Json
+      }
+      get_user_by_id: {
+        Args: { user_id: string }
+        Returns: Json
+      }
       is_super_admin: {
         Args: { user_id: string }
         Returns: boolean
