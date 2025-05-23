@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useEffect, useImperativeHandle } from 'rea
 import GalleryItem from './GalleryItem';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast, toast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,6 +38,7 @@ const Gallery = forwardRef<GalleryRef, GalleryProps>(({ id, onItemClick }, ref) 
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'carousel'>('grid');
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const { toast: toastHook } = useToast();
 
   const fetchGalleryItems = async (showToast = false) => {
     try {
@@ -55,7 +56,7 @@ const Gallery = forwardRef<GalleryRef, GalleryProps>(({ id, onItemClick }, ref) 
       setItems(data || []);
       
       if (showToast) {
-        toast({
+        toastHook({
           title: 'Galeria atualizada',
           description: 'As imagens foram carregadas com sucesso.',
         });
@@ -76,7 +77,7 @@ const Gallery = forwardRef<GalleryRef, GalleryProps>(({ id, onItemClick }, ref) 
       } else {
         setError('Não foi possível carregar as imagens da galeria.');
         
-        toast({
+        toastHook({
           title: 'Erro ao carregar galeria',
           description: 'Não foi possível carregar as imagens da galeria.',
           variant: 'destructive',
