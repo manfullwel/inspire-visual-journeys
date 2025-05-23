@@ -9,11 +9,22 @@ import ImageModal from '@/components/ImageModal';
 import HistorySection from '@/components/HistorySection';
 import ParticipationForm from '@/components/ParticipationForm';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+
+// Interface para as funções expostas pelo ref da galeria
+interface GalleryRef {
+  navigateToNext: () => GalleryItemType | null;
+  navigateToPrevious: () => GalleryItemType | null;
+  hasNext: () => boolean;
+  hasPrevious: () => boolean;
+  getCurrentIndex: () => number;
+  getCurrentItem: () => GalleryItemType;
+  getAllItems: () => GalleryItemType[];
+}
 
 const Index: React.FC = () => {
   const purposeRef = useRef<HTMLElement>(null);
-  const galleryRef = useRef<HTMLElement>(null);
+  const galleryRef = useRef<GalleryRef>(null);
   const participationRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
@@ -32,6 +43,27 @@ const Index: React.FC = () => {
   const handleParticipateClick = () => {
     participationRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  const handleNextImage = () => {
+    if (galleryRef.current) {
+      const nextItem = galleryRef.current.navigateToNext();
+      if (nextItem) {
+        setSelectedItem(nextItem);
+      }
+    }
+  };
+
+  const handlePreviousImage = () => {
+    if (galleryRef.current) {
+      const prevItem = galleryRef.current.navigateToPrevious();
+      if (prevItem) {
+        setSelectedItem(prevItem);
+      }
+    }
+  };
+
+  const hasNext = galleryRef.current?.hasNext() || false;
+  const hasPrevious = galleryRef.current?.hasPrevious() || false;
 
   return (
     <div className="min-h-screen">
@@ -60,7 +92,11 @@ const Index: React.FC = () => {
       <ImageModal 
         item={selectedItem} 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => setIsModalOpen(false)}
+        onNext={handleNextImage}
+        onPrevious={handlePreviousImage}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
       />
     </div>
   );

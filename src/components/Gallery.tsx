@@ -6,6 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface GalleryProps {
   id?: string;
@@ -17,6 +25,7 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'carousel'>('grid');
 
   const fetchGalleryItems = async (showToast = false) => {
     try {
@@ -89,30 +98,118 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
     });
   };
 
+  const renderMasonryGrid = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto">
+      {items.map((item, index) => (
+        <div 
+          key={String(item.id)} 
+          className={`${
+            index % 3 === 0 ? 'lg:col-span-1' : 
+            index % 3 === 1 ? 'lg:col-span-1' : 
+            'lg:col-span-1'
+          } ${
+            index % 6 === 2 || index % 6 === 5 ? 'row-span-1' : 'row-span-1'
+          }`}
+        >
+          <GalleryItem 
+            item={item} 
+            onClick={(item) => {
+              setSelectedIndex(index);
+              onItemClick(item);
+            }} 
+            onImageError={() => handleImageError(index)}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderCarousel = () => (
+    <Carousel className="w-full">
+      <CarouselContent>
+        {items.map((item, index) => (
+          <CarouselItem key={String(item.id)} className="md:basis-1/2 lg:basis-1/3">
+            <div className="p-1">
+              <GalleryItem 
+                item={item} 
+                onClick={(item) => {
+                  setSelectedIndex(index);
+                  onItemClick(item);
+                }} 
+                onImageError={() => handleImageError(index)}
+              />
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="left-1" />
+      <CarouselNext className="right-1" />
+    </Carousel>
+  );
+
+  // Adicionar controle do índice selecionado para navegação no modal
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  // Expor funções de navegação para o componente pai
+  React.useImperativeHandle(ref, () => ({
+    navigateToNext: () => {
+      if (selectedIndex < items.length - 1) {
+        setSelectedIndex(selectedIndex + 1);
+        return items[selectedIndex + 1];
+      }
+      return null;
+    },
+    navigateToPrevious: () => {
+      if (selectedIndex > 0) {
+        setSelectedIndex(selectedIndex - 1);
+        return items[selectedIndex - 1];
+      }
+      return null;
+    },
+    hasNext: () => selectedIndex < items.length - 1,
+    hasPrevious: () => selectedIndex > 0,
+    getCurrentIndex: () => selectedIndex,
+    getCurrentItem: () => items[selectedIndex],
+    getAllItems: () => items
+  }));
+
   return (
     <section ref={ref} id={id} className="py-20 bg-white">
       <div className="container px-4">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <h2 className="text-3xl md:text-4xl font-bold text-event-dark">
-            Nossas Noites Inesquecíveis
+            Sinta a Energia do Pedal
           </h2>
           
-          {!loading && (
-            <Button
-              onClick={handleRetry}
-              variant="outline"
-              size="sm"
-              disabled={refreshing}
-              className="flex items-center gap-2"
+          <div className="flex items-center space-x-2">
+            <Tabs
+              value={viewMode}
+              onValueChange={(v) => setViewMode(v as 'grid' | 'carousel')}
+              className="mr-2"
             >
-              {refreshing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              Atualizar
-            </Button>
-          )}
+              <TabsList className="grid w-[180px] grid-cols-2">
+                <TabsTrigger value="grid">Grade</TabsTrigger>
+                <TabsTrigger value="carousel">Carrossel</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            {!loading && (
+              <Button
+                onClick={handleRetry}
+                variant="outline"
+                size="sm"
+                disabled={refreshing}
+                className="flex items-center gap-2"
+              >
+                {refreshing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Atualizar
+              </Button>
+            )}
+          </div>
         </div>
         
         <p className="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
@@ -143,17 +240,18 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
             <p className="text-xl text-gray-500">Nenhuma imagem encontrada na galeria.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item, index) => (
-              <GalleryItem 
-                key={String(item.id)} 
-                item={item} 
-                onClick={onItemClick} 
-                onImageError={() => handleImageError(index)}
-              />
-            ))}
+          <div className="animate-fade-in">
+            {viewMode === 'grid' ? renderMasonryGrid() : renderCarousel()}
           </div>
         )}
+        
+        <div className="mt-12 text-center">
+          <Button 
+            className="bg-event-orange hover:bg-orange-600 text-white px-6 py-3 rounded-lg shadow-lg transform transition-transform hover:scale-105"
+          >
+            Compartilhe Sua História
+          </Button>
+        </div>
       </div>
     </section>
   );
