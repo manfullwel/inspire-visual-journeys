@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { Camera, CalendarIcon, AlertTriangle } from 'lucide-react';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 interface GalleryItemProps {
   item: GalleryItemType;
@@ -12,6 +13,9 @@ interface GalleryItemProps {
 const GalleryItem: React.FC<GalleryItemProps> = ({ item, onClick, onImageError }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { elementRef, hasIntersected } = useIntersectionObserver({
+    rootMargin: '200px', // Start loading when image is 200px away from viewport
+  });
 
   const handleImageError = () => {
     setHasError(true);
@@ -24,6 +28,7 @@ const GalleryItem: React.FC<GalleryItemProps> = ({ item, onClick, onImageError }
 
   return (
     <div 
+      ref={elementRef as React.RefObject<HTMLDivElement>}
       className="relative group overflow-hidden rounded-xl shadow-md cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
       onClick={() => onClick(item)}
     >
@@ -38,14 +43,16 @@ const GalleryItem: React.FC<GalleryItemProps> = ({ item, onClick, onImageError }
           <div className={`w-full h-64 bg-gray-200 flex items-center justify-center ${isLoaded ? 'hidden' : 'block'}`}>
             <div className="w-6 h-6 border-2 border-event-orange border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <img
-            src={item.image}
-            alt={item.title}
-            className={`w-full h-64 object-cover transition-all duration-500 ${isLoaded ? 'block' : 'hidden'} group-hover:brightness-95`}
-            loading="lazy"
-            onError={handleImageError}
-            onLoad={handleImageLoad}
-          />
+          {(hasIntersected || typeof window === 'undefined') && (
+            <img
+              src={item.image}
+              alt={item.title}
+              className={`w-full h-64 object-cover transition-all duration-500 ${isLoaded ? 'block' : 'hidden'} group-hover:brightness-95`}
+              loading="lazy"
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+            />
+          )}
         </>
       )}
       

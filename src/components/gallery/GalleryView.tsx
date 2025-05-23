@@ -8,6 +8,15 @@ import GalleryCarousel from './GalleryCarousel';
 import GalleryLoading from './GalleryLoading';
 import GalleryError from './GalleryError';
 import { Button } from '@/components/ui/button';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
 
 // Define the interface for functions exposed by the Gallery component
 export interface GalleryRef {
@@ -28,7 +37,15 @@ interface GalleryViewProps {
 const GalleryView = forwardRef<GalleryRef, GalleryViewProps>(({ id, onItemClick }, ref) => {
   const [viewMode, setViewMode] = useState<'grid' | 'carousel'>('grid');
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const { items, loading, error, fetchItems, refreshing, handleImageError } = useGalleryItems();
+  const { 
+    items, 
+    loading, 
+    error, 
+    fetchItems, 
+    refreshing, 
+    handleImageError,
+    pagination 
+  } = useGalleryItems({ pageSize: 6 });
 
   // Expose functions via useImperativeHandle with the correct type
   useImperativeHandle(ref, (): GalleryRef => ({
@@ -56,6 +73,73 @@ const GalleryView = forwardRef<GalleryRef, GalleryViewProps>(({ id, onItemClick 
   const handleItemClick = (item: GalleryItemType, index: number) => {
     setSelectedIndex(index);
     onItemClick(item);
+  };
+
+  // Generate pagination links
+  const renderPaginationItems = () => {
+    const { currentPage, totalPages, goToPage } = pagination;
+    const pageItems = [];
+    
+    // Always show first page
+    pageItems.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          isActive={currentPage === 0} 
+          onClick={() => goToPage(0)}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+
+    // Show ellipsis if there are many pages and we're not at the beginning
+    if (currentPage > 2) {
+      pageItems.push(
+        <PaginationItem key="ellipsis1">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Show current page and surrounding pages
+    for (let i = Math.max(1, currentPage); i <= Math.min(currentPage + 1, totalPages - 1); i++) {
+      if (i === 0) continue; // Skip first page as we already added it
+      pageItems.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            isActive={currentPage === i} 
+            onClick={() => goToPage(i)}
+          >
+            {i + 1}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    // Show ellipsis if there are many pages and we're not at the end
+    if (currentPage < totalPages - 3) {
+      pageItems.push(
+        <PaginationItem key="ellipsis2">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+
+    // Always show last page if not the same as first page
+    if (totalPages > 1) {
+      pageItems.push(
+        <PaginationItem key="last">
+          <PaginationLink 
+            isActive={currentPage === totalPages - 1} 
+            onClick={() => goToPage(totalPages - 1)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return pageItems;
   };
 
   return (
@@ -96,6 +180,28 @@ const GalleryView = forwardRef<GalleryRef, GalleryViewProps>(({ id, onItemClick 
                 onItemClick={handleItemClick} 
                 onImageError={handleImageError} 
               />
+            )}
+            
+            {pagination.totalPages > 1 && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={pagination.hasPreviousPage ? pagination.goToPreviousPage : undefined}
+                      className={!pagination.hasPreviousPage ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationItems()}
+                  
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={pagination.hasNextPage ? pagination.goToNextPage : undefined}
+                      className={!pagination.hasNextPage ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
           </div>
         )}
