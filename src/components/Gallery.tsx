@@ -1,9 +1,8 @@
-
-import React, { forwardRef, useState, useEffect } from 'react';
+import React, { forwardRef, useState, useEffect, useImperativeHandle } from 'react';
 import GalleryItem from './GalleryItem';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,17 +14,30 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+// Define the interface for functions exposed by the Gallery component
+export interface GalleryRef {
+  navigateToNext: () => GalleryItemType | null;
+  navigateToPrevious: () => GalleryItemType | null;
+  hasNext: () => boolean;
+  hasPrevious: () => boolean;
+  getCurrentIndex: () => number;
+  getCurrentItem: () => GalleryItemType;
+  getAllItems: () => GalleryItemType[];
+}
+
 interface GalleryProps {
   id?: string;
   onItemClick: (item: GalleryItemType) => void;
 }
 
-const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref) => {
+// Use forwardRef with explicit typings for the ref
+const Gallery = forwardRef<GalleryRef, GalleryProps>(({ id, onItemClick }, ref) => {
   const [items, setItems] = useState<GalleryItemType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'carousel'>('grid');
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const fetchGalleryItems = async (showToast = false) => {
     try {
@@ -98,6 +110,29 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
     });
   };
 
+  // Expose functions via useImperativeHandle with the correct type
+  useImperativeHandle(ref, (): GalleryRef => ({
+    navigateToNext: () => {
+      if (selectedIndex < items.length - 1) {
+        setSelectedIndex(selectedIndex + 1);
+        return items[selectedIndex + 1];
+      }
+      return null;
+    },
+    navigateToPrevious: () => {
+      if (selectedIndex > 0) {
+        setSelectedIndex(selectedIndex - 1);
+        return items[selectedIndex - 1];
+      }
+      return null;
+    },
+    hasNext: () => selectedIndex < items.length - 1,
+    hasPrevious: () => selectedIndex > 0,
+    getCurrentIndex: () => selectedIndex,
+    getCurrentItem: () => items[selectedIndex],
+    getAllItems: () => items
+  }));
+
   const renderMasonryGrid = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto">
       {items.map((item, index) => (
@@ -147,34 +182,8 @@ const Gallery = forwardRef<HTMLElement, GalleryProps>(({ id, onItemClick }, ref)
     </Carousel>
   );
 
-  // Adicionar controle do índice selecionado para navegação no modal
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-
-  // Expor funções de navegação para o componente pai
-  React.useImperativeHandle(ref, () => ({
-    navigateToNext: () => {
-      if (selectedIndex < items.length - 1) {
-        setSelectedIndex(selectedIndex + 1);
-        return items[selectedIndex + 1];
-      }
-      return null;
-    },
-    navigateToPrevious: () => {
-      if (selectedIndex > 0) {
-        setSelectedIndex(selectedIndex - 1);
-        return items[selectedIndex - 1];
-      }
-      return null;
-    },
-    hasNext: () => selectedIndex < items.length - 1,
-    hasPrevious: () => selectedIndex > 0,
-    getCurrentIndex: () => selectedIndex,
-    getCurrentItem: () => items[selectedIndex],
-    getAllItems: () => items
-  }));
-
   return (
-    <section ref={ref} id={id} className="py-20 bg-white">
+    <section id={id} className="py-20 bg-white">
       <div className="container px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <h2 className="text-3xl md:text-4xl font-bold text-event-dark">

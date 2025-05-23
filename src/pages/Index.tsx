@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import HeroSection from '@/components/HeroSection';
 import PurposeSection from '@/components/PurposeSection';
-import Gallery from '@/components/Gallery';
+import Gallery, { GalleryRef } from '@/components/Gallery';
 import CallToAction from '@/components/CallToAction';
 import Footer from '@/components/Footer';
 import ImageModal from '@/components/ImageModal';
@@ -10,17 +10,6 @@ import HistorySection from '@/components/HistorySection';
 import ParticipationForm from '@/components/ParticipationForm';
 import { GalleryItem as GalleryItemType } from '@/data/gallery';
 import { useToast } from '@/hooks/use-toast';
-
-// Interface para as funções expostas pelo ref da galeria
-interface GalleryRef {
-  navigateToNext: () => GalleryItemType | null;
-  navigateToPrevious: () => GalleryItemType | null;
-  hasNext: () => boolean;
-  hasPrevious: () => boolean;
-  getCurrentIndex: () => number;
-  getCurrentItem: () => GalleryItemType;
-  getAllItems: () => GalleryItemType[];
-}
 
 const Index: React.FC = () => {
   const purposeRef = useRef<HTMLElement>(null);
@@ -68,7 +57,13 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen">
       <HeroSection 
-        onDiscoverClick={() => scrollToRef(galleryRef)} 
+        onDiscoverClick={() => {
+          // Create a separate ref for scrolling
+          const galleryElement = document.getElementById('gallery-section');
+          if (galleryElement) {
+            galleryElement.scrollIntoView({ behavior: 'smooth' });
+          }
+        }} 
         onPurposeClick={() => scrollToRef(purposeRef)} 
       />
       
@@ -77,6 +72,7 @@ const Index: React.FC = () => {
       <HistorySection />
       
       <Gallery 
+        id="gallery-section"
         ref={galleryRef} 
         onItemClick={handleItemClick} 
       />
