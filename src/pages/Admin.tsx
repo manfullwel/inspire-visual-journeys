@@ -8,6 +8,7 @@ import AdminStatsView from '@/components/AdminStatsView';
 import AdminAuditView from '@/components/AdminAuditView';
 import AdminUsersView from '@/components/AdminUsersView';
 import { useAuth } from '@/components/AuthProvider';
+import NotFound from '@/pages/NotFound';
 
 const Admin: React.FC = () => {
   const { isAdmin, loading } = useAuth();
@@ -33,6 +34,7 @@ const Admin: React.FC = () => {
         <Route path="audit" element={<AdminAuditView />} />
         <Route path="users" element={<AdminUsersView />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

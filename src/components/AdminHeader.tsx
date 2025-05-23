@@ -1,108 +1,113 @@
 
 import React from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
-import { Bike, LogOut, BarChart2, Image, MessageSquare, Users, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate, Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { LogOut, Image, MessageSquare, LineChart, Shield, Users } from 'lucide-react';
 
 const AdminHeader: React.FC = () => {
-  const { user, isSuperAdmin, signOut } = useAuth();
+  const { signOut, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
+  const handleSignOut = async () => {
     await signOut();
-    navigate('/admin-login');
+    navigate('/');
   };
 
   return (
-    <header className="bg-event-dark text-white py-4 px-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Bike className="h-8 w-8 text-event-orange mr-3" />
-          <div>
-            <h1 className="text-xl font-bold">Bike Night Admin</h1>
-            <p className="text-sm text-gray-300">{user?.email}</p>
-          </div>
+    <header className="bg-white shadow">
+      <div className="container px-4 py-4 flex flex-col sm:flex-row justify-between items-center">
+        <div className="flex items-center mb-4 sm:mb-0">
+          <h1 className="text-2xl font-bold text-event-dark">
+            Painel Administrativo
+          </h1>
         </div>
         
-        <div className="flex items-center space-x-4">
-          <Link to="/" className="text-gray-300 hover:text-white transition">
-            Ver site
-          </Link>
-          
-          <Button 
-            size="sm"
-            variant="outline"
-            className="border-gray-600 text-gray-200 hover:bg-gray-700"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sair
-          </Button>
-        </div>
+        <nav className="w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+          <ul className="flex space-x-1 md:space-x-2">
+            <li>
+              <NavLink 
+                to="/admin"
+                end
+                className={({ isActive }) => 
+                  `px-3 py-2 rounded-md text-sm flex items-center ${
+                    isActive ? 'bg-event-orange text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <Image className="w-4 h-4 mr-1" />
+                <span>Galeria</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink 
+                to="/admin/comments"
+                className={({ isActive }) => 
+                  `px-3 py-2 rounded-md text-sm flex items-center ${
+                    isActive ? 'bg-event-orange text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <MessageSquare className="w-4 h-4 mr-1" />
+                <span>Comentários</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink 
+                to="/admin/stats"
+                className={({ isActive }) => 
+                  `px-3 py-2 rounded-md text-sm flex items-center ${
+                    isActive ? 'bg-event-orange text-white' : 'text-gray-700 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <LineChart className="w-4 h-4 mr-1" />
+                <span>Estatísticas</span>
+              </NavLink>
+            </li>
+            {isSuperAdmin && (
+              <>
+                <li>
+                  <NavLink 
+                    to="/admin/audit"
+                    className={({ isActive }) => 
+                      `px-3 py-2 rounded-md text-sm flex items-center ${
+                        isActive ? 'bg-purple-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                      }`
+                    }
+                  >
+                    <Shield className="w-4 h-4 mr-1" />
+                    <span>Auditoria</span>
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink 
+                    to="/admin/users"
+                    className={({ isActive }) => 
+                      `px-3 py-2 rounded-md text-sm flex items-center ${
+                        isActive ? 'bg-purple-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+                      }`
+                    }
+                  >
+                    <Users className="w-4 h-4 mr-1" />
+                    <span>Usuários</span>
+                  </NavLink>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSignOut}
+          className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 mt-2 sm:mt-0"
+        >
+          <LogOut className="w-4 h-4 mr-1" />
+          <span>Sair</span>
+        </Button>
       </div>
-
-      <nav className="flex overflow-x-auto pb-3">
-        <Link 
-          to="/admin"
-          className={cn(
-            "px-4 py-2 rounded-lg mx-1 flex items-center whitespace-nowrap",
-            "text-gray-300 hover:text-white hover:bg-gray-700"
-          )}
-        >
-          <Image className="h-4 w-4 mr-2" />
-          Galeria
-        </Link>
-        
-        <Link 
-          to="/admin/comments"
-          className={cn(
-            "px-4 py-2 rounded-lg mx-1 flex items-center whitespace-nowrap",
-            "text-gray-300 hover:text-white hover:bg-gray-700"
-          )}
-        >
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Comentários
-        </Link>
-        
-        {isSuperAdmin && (
-          <>
-            <Link 
-              to="/admin/users"
-              className={cn(
-                "px-4 py-2 rounded-lg mx-1 flex items-center whitespace-nowrap",
-                "text-gray-300 hover:text-white hover:bg-gray-700"
-              )}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Usuários
-            </Link>
-            
-            <Link 
-              to="/admin/stats"
-              className={cn(
-                "px-4 py-2 rounded-lg mx-1 flex items-center whitespace-nowrap",
-                "text-gray-300 hover:text-white hover:bg-gray-700"
-              )}
-            >
-              <BarChart2 className="h-4 w-4 mr-2" />
-              Estatísticas
-            </Link>
-            
-            <Link 
-              to="/admin/audit"
-              className={cn(
-                "px-4 py-2 rounded-lg mx-1 flex items-center whitespace-nowrap",
-                "text-gray-300 hover:text-white hover:bg-gray-700"
-              )}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Logs de Auditoria
-            </Link>
-          </>
-        )}
-      </nav>
     </header>
   );
 };
